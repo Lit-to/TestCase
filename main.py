@@ -72,9 +72,8 @@ class testCaseModal(discord.ui.Modal):
         await interaction.response.defer()
         testPath=sc.main(query)
         if testPath[0]==False:
-            # await interaction.followup.send("テストケースが存在しません "+query[0]+" "+query[1]+" "+query[2]+" "+query[3],ephemeral=True)
             await interaction.followup.send(testPath[1],ephemeral=True)
-        # testPath.append(sc.main(query))
+            return
         case_file=[]
         case_file.append(discord.File(testPath[1]))
         case_file.append(discord.File(testPath[2]))
