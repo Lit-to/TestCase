@@ -23,7 +23,7 @@ class testCaseModal(discord.ui.Modal):
             title="テストケースを入力",
             timeout=None,
         )
-        searchCase = sc.main()
+        searchCase = sc.main()[1]
         searchCase=list(map(lambda x:discord.SelectOption(label=x),searchCase))
         self.contest_type = discord.ui.TextInput(
             label="コンテストの種類",
@@ -57,9 +57,7 @@ class testCaseModal(discord.ui.Modal):
             min_length=1,
             style=discord.TextStyle.short
         )
-        # self.contest_type.label=self.contest_type.label.lower()
-        # self.contest_set.label=self.contest_set.label.upper()
-        # self.contest_set.label="Ex" if self.contest_set.label=="X" else self.contest_set.label#Xの場合はExに変換
+
         self.add_item(self.contest_type)
         self.add_item(self.contest_number)
         self.add_item(self.contest_set)
@@ -73,17 +71,19 @@ class testCaseModal(discord.ui.Modal):
         query.append(self.contest_case.value)
         testPath=[]
         await interaction.response.defer()
-        testPath.append(sc.main(query,"in"))
-        testPath.append(sc.main(query,"out"))
+        testPath.append(sc.main(query,"in")[1])
+        testPath.append(sc.main(query,"out")[1])
         case_file=[]
         for i in testPath:
             case_file.append(discord.File(i))
         if False in testPath:
             await interaction.followup.send("テストケースが存在しません "+query[0]+" "+query[1]+" "+query[2]+" "+query[3],ephemeral=True)
         else:
-            await interaction.followup.send(query[0]+" "+query[1]+" "+query[2]+" "+query[3]+" の入力ファイル:")
+            file_name=testPath[0].split("\\")
+            icon={"abc":":blue_circle:","arc":":green_circle:","agc":":orange_circle:"}
+            await interaction.followup.send("## "+icon[query[0]]+file_name[1].upper()+" :regional_indicator_"+file_name[2].lower()+":"+" の入力ファイル"+file_name[4]+"を送信中...:")
             await interaction.followup.send(file=case_file[0])
-            await interaction.followup.send(query[0]+" "+query[1]+" "+query[2]+" "+query[3]+" の出力ファイル:")
+            await interaction.followup.send("## "+icon[query[0]]+file_name[1].upper()+" :regional_indicator_"+file_name[2].lower()+":"+" の出力ファイル"+file_name[4]+"を送信中...:")
             await interaction.followup.send(file=case_file[1])
 
 #起動
@@ -109,13 +109,17 @@ async def test_case(interaction: discord.Interaction):
 async def contest(interaction: discord.Interaction,contest_type:str,contest_number:str,question_set:str,test_case:str,in_or_out:str=""):
     await interaction.response.defer()
     testPath=[]
+    searched=sc.main([contest_type,contest_number,question_set,test_case])
+    if searched[0]==False:#テストケースが見つからなかった場合そのままエラーを返す
+        await interaction.followup.send(searched[1])
+        return
     if in_or_out=="":
-        testPath.append(sc.main([contest_type,contest_number,question_set,test_case],"in"))
-        testPath.append(sc.main([contest_type,contest_number,question_set,test_case],"out"))
+        testPath.append(searched[1])
+        testPath.append(searched[2])
     elif in_or_out=="in":
-        testPath.append(sc.main([contest_type,contest_number,question_set,test_case],"in"))
+        testPath.append(searched[1])
     elif in_or_out=="out":
-        testPath.append(sc.main([contest_type,contest_number,question_set,test_case],"out"))
+        testPath.append(searched[2])
     else:
         await interaction.followup.send("in_or_outにはinかoutを入力してください")
     case_file=[]

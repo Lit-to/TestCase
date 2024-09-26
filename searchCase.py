@@ -1,61 +1,38 @@
 import sys,os
 import indexList as iL
-
-# def getContestStr(contestType:str,contestNumber:str): #回に応じて大文字か小文字かを判定して適切な文字列を返す
-#     if contestType.lower()=="abc":
-#         if int(contestNumber)<=197:
-#             return contestType.upper()+contestNumber
-#         elif 197<int(contestNumber):
-#             return contestType.lower()+contestNumber
-#     elif contestType.lower()=="arc":
-#         if int(contestNumber)<=197:
-#             return contestType.upper()+contestNumber
-#         elif 197<int(contestNumber):
-#             return contestType.lower()+contestNumber
-#     elif contestType.lower()=="agc":
-#         if int(contestNumber)<=197:
-#             return contestType.upper()+contestNumber
-#         elif 197<int(contestNumber):
-#             return contestType.lower()+contestNumber
-
 def getContestType():#コンテストの種類を返す
-    return ["abc","arc","agc"]
+    return False,["abc","arc","agc"]
 
 def getContestNumber(contestType:str,indexListData:dict):#ストックされているコンテストの番号を返す、無ければ空配列
     result=[]
     for i in list(indexListData.keys()):
         if i[:3]==contestType.lower():
             result.append(i[3:])
-    return result
-    # if contestType not in indexListData:
-    #     return False
-    # else:
-    #     return indexListData[contestType]
-
+    return False,result
 
 def getContestSet(contestStr:str,indexListData:dict): #コンテストのセット(A~Hのいずれか)を返す、無ければFalse
     if contestStr not in indexListData:
-        return False
+        return False,"指定のコンテストのテストケースが見つかりません。"
     else:
-        return list(indexListData[contestStr].keys())[1:]#_filesを無視する
+        return False,list(indexListData[contestStr].keys())[1:]#_filesを無視する
 
 def getContestCase(contestStr:str,QuestionSet:str,indexListData:dict):#コンテストのセットに含まれるテストケースを返す、無ければFalse
     if QuestionSet not in indexListData[contestStr]:
-        return False
+        return False,"該当セットがありません。"
     else:
-        return indexListData[contestStr][QuestionSet]["in"]["_files"]
+        return False,indexListData[contestStr][QuestionSet]["in"]["_files"]
 
 def searchTestCase(contestStr:str,QuestionSet:str,testCase:str,indexListData:dict):#テストケースの名前が何番目かを返す(0-indexed)、無ければFalse
     if testCase not in indexListData[contestStr][QuestionSet]["in"]["_files"]:
-        return False
+        return False,"指定のテストケースが見つかりません。"
     else:
-        return indexListData[contestStr][QuestionSet]["in"]["_files"].index(testCase)
+        return False,indexListData[contestStr][QuestionSet]["in"]["_files"].index(testCase)
 
-def getTestCasePath(contestStr:str,QuestionSet:str,testCaseNumber:str,indexListData:dict,inOrOut:str): #テストケースの番号(0-indexed)からパスを返す、無ければFalse
+def getTestCasePath(contestStr:str,QuestionSet:str,testCaseNumber:int,indexListData:dict,inOrOut:str): #テストケースの番号(0-indexed)からパスを返す、無ければFalse
     if len(indexListData[contestStr][QuestionSet]["in"]["_files"])<testCaseNumber or testCaseNumber<0:
-        return False
+        return False,"指定のテストケースが見つかりません。"
     else:
-        return os.path.join(contestStr,QuestionSet,inOrOut,indexListData[contestStr][QuestionSet][inOrOut]["_files"][testCaseNumber])
+        return True,os.path.join(contestStr,QuestionSet,inOrOut,indexListData[contestStr][QuestionSet][inOrOut]["_files"][testCaseNumber])
 
 def main(args=[],inOrOut="in",directory="out"):
     #引数0個目にコンテストの種類、1個目にコンテストの番号、2個目にセット、3個目にテストケースの番号、4個目にinかoutを入れる
@@ -77,26 +54,26 @@ def main(args=[],inOrOut="in",directory="out"):
         args[0]=args[0].lower()
         args[2]=args[2].upper()
         contestStr=args[0]+args[1]
-        if args[3].endswith(".txt"):#引数が数字の場合はテストケース名を返す
+        if args[3].endswith(".txt"):#引数が数字でない場合はテストケース名を返す
             testCaseNumber=searchTestCase(contestStr,args[2],args[3],indexListData)#テストケースの番号を取得
             if type(testCaseNumber)==bool:#テストケースの番号が見つからなかった場合はFalseを返す
-                return False
+                return False,"指定のテストケースが見つかりません。"
             else:#テストケースの番号が見つかった場合はパスを返す
-                filename=getTestCasePath(contestStr,args[2],testCaseNumber,indexListData,inOrOut)
-                if filename!=False:
-                    return os.path.join(directory,filename)
+                filename_in=getTestCasePath(contestStr,args[2],testCaseNumber,indexListData,"in")
+                filename_out=getTestCasePath(contestStr,args[2],testCaseNumber,indexListData,"out")
+                if filename_in[0] and filename_out[0]:
+                    return True,os.path.join(directory,filename_in[1]),os.path.join(directory,filename_out[1])
                 else:
-                    return False
-        else:#引数が数字でない場合はその名前のテストケースを返す
-            filename=getTestCasePath(contestStr,args[2],int(args[3])-1,indexListData,inOrOut)
-            if filename!=False:
-                return os.path.join(directory,filename)
+                    return False,"指定のテストケースが見つかりません。"
+        else:#引数が数字の場合はその名前のテストケースを返す
+            filename_in=getTestCasePath(contestStr,args[2],int(args[3])-1,indexListData,"in")
+            filename_out=getTestCasePath(contestStr,args[2],int(args[3])-1,indexListData,"out")
+            if filename_in[0] and filename_out[0]:
+                return True,os.path.join(directory,filename_in[1]),os.path.join(directory,filename_out[1])
             else:
-                return False
-
-
+                return False,"指定のテストケースが見つかりません。"
     else:#引数が6つ以上の場合はFalse
-        return False
+        return False,"引数が多すぎます。"
 
 if __name__=="__main__":
     args=[]
