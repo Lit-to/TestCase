@@ -69,22 +69,21 @@ class testCaseModal(discord.ui.Modal):
         query.append(self.contest_number.value)
         query.append(self.contest_set.value)
         query.append(self.contest_case.value)
-        testPath=[]
         await interaction.response.defer()
-        testPath.append(sc.main(query,"in")[1])
-        testPath.append(sc.main(query,"out")[1])
+        testPath=sc.main(query)
+        if testPath[0]==False:
+            # await interaction.followup.send("テストケースが存在しません "+query[0]+" "+query[1]+" "+query[2]+" "+query[3],ephemeral=True)
+            await interaction.followup.send(testPath[1],ephemeral=True)
+        # testPath.append(sc.main(query))
         case_file=[]
-        for i in testPath:
-            case_file.append(discord.File(i))
-        if False in testPath:
-            await interaction.followup.send("テストケースが存在しません "+query[0]+" "+query[1]+" "+query[2]+" "+query[3],ephemeral=True)
-        else:
-            file_name=testPath[0].split("\\")
-            icon={"abc":":blue_circle:","arc":":green_circle:","agc":":orange_circle:"}
-            await interaction.followup.send("## "+icon[query[0]]+file_name[1].upper()+" :regional_indicator_"+file_name[2].lower()+":"+" の入力ファイル"+file_name[4]+"を送信中...:")
-            await interaction.followup.send(file=case_file[0])
-            await interaction.followup.send("## "+icon[query[0]]+file_name[1].upper()+" :regional_indicator_"+file_name[2].lower()+":"+" の出力ファイル"+file_name[4]+"を送信中...:")
-            await interaction.followup.send(file=case_file[1])
+        case_file.append(discord.File(testPath[1]))
+        case_file.append(discord.File(testPath[2]))
+        file_name=testPath[1].split("\\")
+        icon={"abc":":blue_circle:","arc":":green_circle:","agc":":orange_circle:"}
+        await interaction.followup.send("## "+icon[query[0]]+file_name[1].upper()+" :regional_indicator_"+file_name[2].lower()+":"+" の入力ファイル("+file_name[4]+")を送信中...:")
+        await interaction.followup.send(file=case_file[0])
+        await interaction.followup.send("## "+icon[query[0]]+file_name[1].upper()+" :regional_indicator_"+file_name[2].lower()+":"+" の出力ファイル("+file_name[4]+")を送信中...:")
+        await interaction.followup.send(file=case_file[1])
 
 #起動
 @client.event
