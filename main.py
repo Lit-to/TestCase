@@ -8,8 +8,12 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 def getToken():
-    with open("setting.json",mode="r") as f:
+    with open("token.json",mode="r") as f:
         data=json.load(f)
+    if "discord" not in data.keys():
+        raise Exception("discordのトークンが設定されていません")
+    if "token" not in data["discord"].keys():
+        raise Exception("tokenが設定されていません")
     return data["discord"]["token"]
 
 
@@ -19,7 +23,7 @@ class testCaseModal(discord.ui.Modal):
             title="テストケースを入力",
             timeout=None,
         )
-        searchCase = sc.main([False])
+        searchCase = sc.main()
         searchCase=list(map(lambda x:discord.SelectOption(label=x),searchCase))
         self.contest_type = discord.ui.TextInput(
             label="コンテストの種類",
@@ -53,7 +57,9 @@ class testCaseModal(discord.ui.Modal):
             min_length=1,
             style=discord.TextStyle.short
         )
-        self.contest_set="Ex" if self.contest_set=="X" else self.contest_set#Xの場合はExに変換
+        # self.contest_type.label=self.contest_type.label.lower()
+        # self.contest_set.label=self.contest_set.label.upper()
+        # self.contest_set.label="Ex" if self.contest_set.label=="X" else self.contest_set.label#Xの場合はExに変換
         self.add_item(self.contest_type)
         self.add_item(self.contest_number)
         self.add_item(self.contest_set)
@@ -75,10 +81,10 @@ class testCaseModal(discord.ui.Modal):
         if False in testPath:
             await interaction.followup.send("テストケースが存在しません "+query[0]+" "+query[1]+" "+query[2]+" "+query[3],ephemeral=True)
         else:
-            await interaction.followup.send(query[0]+" "+query[1]+" "+query[2]+" "+query[3]+" の入力ファイル:",ephemeral=True)
-            await interaction.followup.send(files=case_file[0])
-            await interaction.followup.send(query[0]+" "+query[1]+" "+query[2]+" "+query[3]+" の出力ファイル:",ephemeral=True)
-            await interaction.followup.send(files=case_file[1])
+            await interaction.followup.send(query[0]+" "+query[1]+" "+query[2]+" "+query[3]+" の入力ファイル:")
+            await interaction.followup.send(file=case_file[0])
+            await interaction.followup.send(query[0]+" "+query[1]+" "+query[2]+" "+query[3]+" の出力ファイル:")
+            await interaction.followup.send(file=case_file[1])
 
 #起動
 @client.event
@@ -97,8 +103,6 @@ async def test_case(interaction: discord.Interaction):
     # await interaction.response.defer()
     testCase=testCaseModal()
     await interaction.response.send_modal(testCase)
-
-
 
 @tree.command(name='case', description='テストケースのファイルを返すよ')
 @app_commands.describe(contest_type="コンテストの種類",contest_number="コンテストの番号",question_set="A~H",test_case="テストケースの番号",in_or_out="入力ファイルはin、出力ファイルはout(未記入の場合はin)")
@@ -121,8 +125,5 @@ async def contest(interaction: discord.Interaction,contest_type:str,contest_numb
         await interaction.followup.send("テストケースが存在しません"+contest_type+contest_number+question_set+test_case)
     else:
         await interaction.followup.send(files=case_file)
-
-
-
 
 client.run(getToken())

@@ -57,39 +57,54 @@ def getTestCasePath(contestStr:str,QuestionSet:str,testCaseNumber:str,indexListD
     else:
         return os.path.join(contestStr,QuestionSet,inOrOut,indexListData[contestStr][QuestionSet][inOrOut]["_files"][testCaseNumber])
 
-def main(args:list,inOrOut="in",directory="out"):
-    #引数は0は無視し、1個目にコンテストの種類、2個目にコンテストの番号、3個目にセット、4個目にテストケースの番号、5個目にinかoutを入れる
+def main(args=[],inOrOut="in",directory="out"):
+    #引数0個目にコンテストの種類、1個目にコンテストの番号、2個目にセット、3個目にテストケースの番号、4個目にinかoutを入れる
     indexListData=iL.getList("indexList.json")
-    args=args[1:]
+    args=args
     if len(args)==0:#引数がない場合はコンテストの種類を返す
         return getContestType()
-    elif len(args)==1:#引数が1つの場合はコンテストの番号を返す、なければ[]
+    if len(args)==1:#引数が1つの場合はコンテストの番号を返す、なければ[]
         return getContestNumber(args[0],indexListData)
     elif len(args)==2:#引数が2つの場合はコンテストのセットを返す、なければFalse
         contestStr=args[0]+args[1]
         return getContestSet(contestStr,indexListData)
     elif len(args)==3:#引数が3つの場合はコンテストのセットに含まれるテストケースを返す、なければFalse
+        args[0]=args[0].lower()
+        args[2]=args[2].upper()
         contestStr=args[0]+args[1]
         return getContestCase(contestStr,args[2],indexListData)
     elif len(args)==4:#引数が4つの場合はテストケースのパスを返す、なければFalse
+        args[0]=args[0].lower()
+        args[2]=args[2].upper()
         contestStr=args[0]+args[1]
-        if args[3].isdigit()==False:#引数が数字では場合はテストケース名を返す
+        if args[3].endswith(".txt"):#引数が数字の場合はテストケース名を返す
             testCaseNumber=searchTestCase(contestStr,args[2],args[3],indexListData)#テストケースの番号を取得
-            if testCaseNumber==False:
+            if type(testCaseNumber)==bool:#テストケースの番号が見つからなかった場合はFalseを返す
                 return False
             else:#テストケースの番号が見つかった場合はパスを返す
-                return getTestCasePath(contestStr,args[2],testCaseNumber,indexListData,inOrOut)
+                filename=getTestCasePath(contestStr,args[2],testCaseNumber,indexListData,inOrOut)
+                if filename!=False:
+                    return os.path.join(directory,filename)
+                else:
+                    return False
         else:#引数が数字でない場合はその名前のテストケースを返す
             filename=getTestCasePath(contestStr,args[2],int(args[3])-1,indexListData,inOrOut)
             if filename!=False:
                 return os.path.join(directory,filename)
             else:
                 return False
+
+
     else:#引数が6つ以上の場合はFalse
         return False
 
 if __name__=="__main__":
-    print(main(args=sys.argv))
+    args=[]
+    args.append(input("コンテストの種類を入力してください:"))
+    args.append(input("番号"))
+    args.append(input("セット"))
+    args.append(input("ケース"))
+    print(main(args))
 
 
 
