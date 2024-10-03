@@ -3,6 +3,7 @@ from discord import app_commands
 import fileout as fo
 import searchCase as sc
 import json
+import os
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
@@ -77,9 +78,8 @@ class testCaseModal(discord.ui.Modal):
         case_file=[]
         case_file.append(discord.File(testPath[1]))
         case_file.append(discord.File(testPath[2]))
-        file_name=testPath[1].split("\\")
+        file_name=testPath[1].split(os.sep)
         icon={"abc":":blue_circle:","arc":":green_circle:","agc":":orange_circle:"}
-        print(file_name)
         await interaction.followup.send("## "+icon[query[0]]+file_name[1].upper()+" :regional_indicator_"+file_name[2].lower()+":"+" の入力ファイル("+file_name[4]+")を送信中...:")
         await interaction.followup.send(file=case_file[0])
         await interaction.followup.send("## "+icon[query[0]]+file_name[1].upper()+" :regional_indicator_"+file_name[2].lower()+":"+" の出力ファイル("+file_name[4]+")を送信中...:")
