@@ -65,6 +65,7 @@ class testCaseModal(discord.ui.Modal):
         self.add_item(self.contest_case)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        fo.printf(interaction.user.name,">>>modal submit",self.contest_type.value,self.contest_number.value,self.contest_set.value,self.contest_case.value)
         query=[]
         query.append(self.contest_type.value)
         query.append(self.contest_number.value)
@@ -99,6 +100,7 @@ async def on_ready():
 
 @tree.command(name="c", description="テストケース選択画面を出すよ")
 async def test_case(interaction: discord.Interaction):
+    fo.printf(interaction.user.name,">>>/c")
     # await interaction.response.defer()
     testCase=testCaseModal()
     await interaction.response.send_modal(testCase)
@@ -106,6 +108,7 @@ async def test_case(interaction: discord.Interaction):
 @tree.command(name='case', description='テストケースのファイルを返すよ')
 @app_commands.describe(contest_type="コンテストの種類",contest_number="コンテストの番号",question_set="A~H",test_case="テストケースの番号",in_or_out="入力ファイルはin、出力ファイルはout(未記入の場合はin)")
 async def contest(interaction: discord.Interaction,contest_type:str,contest_number:str,question_set:str,test_case:str,in_or_out:str=""):
+    fo.printf(interaction.user.name,">>>/case",contest_type,contest_number,question_set,test_case,in_or_out)
     await interaction.response.defer()
     testPath=[]
     searched=sc.main([contest_type,contest_number,question_set,test_case])
