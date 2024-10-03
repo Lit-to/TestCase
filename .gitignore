@@ -3,3 +3,7 @@ out/
 token.md
 .vscode/
 __pycache__/
+.pem
+.ssh/
+/key.txt
+

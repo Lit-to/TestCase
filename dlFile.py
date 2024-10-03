@@ -98,10 +98,11 @@ def process_folder(dbx, link, folder_path, local_download_path): # フォルダ�
                     dbx.sharing_get_shared_link_file_to_file(download_path=local_file_path,url=link.url,path=file_path)
                     break
                 except:#回線切れたりとかしてやり直す時
-                        print("download filed:",local_download_path,">reconnection 10 seconds...",end=".............>")
+                        fo.printf("_Download filed:",local_download_path,">reconnection 10 seconds...",end=".............>")
                         time.sleep(10)
-                        print("reconnection")
+                        fo.printf("_reconnection")
                 continue
+            fo.printf(f"_Downloaded: {entry.name}")
         else:
             # サブフォルダのダウンロード先ディレクトリを作成
             subfolder_path = os.path.join(local_download_path, entry.name)
@@ -142,7 +143,6 @@ def filter_abc(mypc:set,dropbox:list): # PCにすでにないファイルのみ�
 
 
 # 共有リンクを指定してファイル一覧を取得
-# shared_link = "https://www.dropbox.com/scl/fo/z08oxwzlfdc9bzyv6ds1p/APgi8jtfGEhybHAGXq24LbU?rlkey=ksljwh5jubpptdxlxg5x217x2&st=cjf0ztmo&dl=0"
 # アクセストークンを取得
 while True:
     doing_file=""
@@ -158,7 +158,7 @@ while True:
         files = filter_abc(pc_folders,dropbox_folders)
         files.sort()
         files.reverse()
-        print("start",time.time())
+        fo.printf("start",time.time())
         i=0
         while i<len(files): 
         # for i in range(len(files)):
@@ -169,14 +169,14 @@ while True:
             download_shared_folder(shared_link, "/"+files[i], os.path.join("out",files[i]).lower())
             fo.printf(f"Downloaded: {files[i]}") if i%500==0 else None
             i+=1
-        print("fin",time.time())
+        fo.printf("fin",time.time())
 
         file_structure=sc.getFileStructure("out")
         iL.dump("indexList.json",file_structure)
     except:
         fo.printf(doing_file,"cruppsted 10 seconds...")
         time.sleep(10)
-        print("go next")
+        fo.printf("go next")
         continue
 
 
