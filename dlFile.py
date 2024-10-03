@@ -102,7 +102,7 @@ def process_folder(dbx, link, folder_path, local_download_path): # フォルダ�
                         time.sleep(10)
                         fo.printf("_reconnection")
                 continue
-            fo.printf(f"_Downloaded: {entry.name}")
+            fo.printf("_Downloaded:" +local_download_path+"/"+entry.name)
         else:
             # サブフォルダのダウンロード先ディレクトリを作成
             subfolder_path = os.path.join(local_download_path, entry.name)
