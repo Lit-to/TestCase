@@ -168,6 +168,8 @@ while True:
             ACCESS_TOKEN = get_access_token()
             dbx = dropbox.Dropbox(ACCESS_TOKEN)
             download_shared_folder(shared_link, "/"+files[i], os.path.join("out",files[i]).lower())
+            file_structure=iL.getFileStructure("out")
+            iL.dump("indexList.json",file_structure)
             # if i%20==0:
             i+=1
         fo.printf("fin",time.time())
