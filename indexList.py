@@ -1,6 +1,5 @@
 import json
 import os
-import indexList as iL
 
 
 def getList(path:str):
