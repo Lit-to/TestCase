@@ -96,6 +96,8 @@ def process_folder(dbx, link, folder_path, local_download_path): # フォルダ�
             while True:
                 try:
                     dbx.sharing_get_shared_link_file_to_file(download_path=local_file_path,url=link.url,path=file_path)
+                    file_structure=sc.getFileStructure("out")
+                    iL.dump("indexList.json",file_structure)#ファイル構造を更新
                     break
                 except:#回線切れたりとかしてやり直す時
                         fo.printf("_Download filed:",local_download_path,">reconnection 10 seconds...",end=".............>")
@@ -167,10 +169,8 @@ while True:
             ACCESS_TOKEN = get_access_token()
             dbx = dropbox.Dropbox(ACCESS_TOKEN)
             download_shared_folder(shared_link, "/"+files[i], os.path.join("out",files[i]).lower())
-            if i%20==0:
-                fo.printf(f"Downloaded: {files[i]}")
-                file_structure=sc.getFileStructure("out")
-                iL.dump("indexList.json",file_structure)
+            # if i%20==0:
+
             i+=1
         fo.printf("fin",time.time())
         file_structure=sc.getFileStructure("out")
